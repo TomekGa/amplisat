@@ -82,3 +82,26 @@ Those desiring to incorporate this work into commercial products or use for comm
 IN NO EVENT SHALL THE INVENTORS (ALVARO SEBASTIAN, MAGDALENA MIGALSKA OR JACEK RADWAN) BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE, EVEN IF THE INVENTORS HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 THE SOFTWARE PROVIDED HEREIN IS ON AN “AS IS” BASIS, AND THE INVENTORS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS. THE INVENTORS MAKES NO REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER IMPLIED OR EXPRESS, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR THAT THE USE OF THE SOFTWARE WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
+
+## Server installation
+
+This part was developed by TG to enable the local installation of AmpliSAT software on the servers of the Institute of Environmental Sciences, Jagiellonian University in Kraków. The global installation was impossible due to security issues related to the Docker container. Note that until now, the only supported scripts on the servers are **ampliSAS.pl**, **ampliTCR.pl** and **ampliSAS.pl**. The main changes compared to the original scripts were to force them to look for lacking Perl modules in the parent directory and force them to create all temporary files locally.
+
+To install AmpliSAT on servers you should:
+1. Download the repository to your local repository on the server.
+2. Provide permissions to all scripts inside the directory.
+   
+```
+chmod -R 777 ~/amplisat
+```
+3. Create the conda environment using the conda recipe file located inside *server_installation/* folder (requires installed conda).
+
+```
+conda create -n Amplisat --file ~/amplisat/server_installation/Amplisas_conda_recipe.txt
+```
+4. Activate conda environment.
+
+```
+conda activate Amplisat
+```
+5. Run scripts. The exemplary data to test if everything works can be found in *server_installation/ampli_test/* directory 
