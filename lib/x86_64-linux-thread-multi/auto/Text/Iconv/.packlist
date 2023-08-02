@@ -1,0 +1,4 @@
+/home/tomasz.gaczorek/.conda/envs/amplisas/lib/site_perl/5.26.2/x86_64-linux-thread-multi/Text/Iconv.pm relocate_as=../../../Text/Iconv.pm
+/home/tomasz.gaczorek/.conda/envs/amplisas/lib/site_perl/5.26.2/x86_64-linux-thread-multi/auto/Text/Iconv/Iconv.so relocate_as=Iconv.so
+/home/tomasz.gaczorek/.conda/envs/amplisas/lib/site_perl/5.26.2/x86_64-linux-thread-multi/auto/Text/Iconv/autosplit.ix relocate_as=autosplit.ix
+/home/tomasz.gaczorek/.conda/envs/amplisas/man/man3/Text::Iconv.3 relocate_as=../../../../../../../man/man3/Text::Iconv.3
