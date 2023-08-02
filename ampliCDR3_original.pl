@@ -21,9 +21,7 @@ my $AUTHOR = "Alvaro Sebastian";
 my $DESCRIPTION = "Extracts TCR CDR3 sequences trimmed based on primer location.";
 
 # Modules are in folder '../' in the path of the script
-#use lib "lib";
-use FindBin; #modified - Tomek
-use lib "$FindBin::Bin/lib"; #modified - Tomek - forcing script to look for perl packages inside amplisas folder
+use lib "lib";
 use File::FindLib 'lib';
 # Perl modules necessaries for the correct working of the script
 use Cwd;
@@ -159,7 +157,7 @@ GetOptions(
 	'if|inframe' => \$INP_noframe,
 	'si|single' => \$INP_singletons,
 	'cl|cluster=i' => \$INP_cluster_errors,
-	'umi:s' => \$INP_umi_cluster,
+	'umi=s' => \$INP_umi_cluster,
 	'ucl|umicluster=i' => \$INP_umi_errors,
 	'noref' => \$INP_noref,
 	'vref=s' => \$INP_ref_files{'tcrv'},
@@ -319,14 +317,6 @@ if (!defined($sampledata) || !%$sampledata){
 
 # Creates sample information, each file will be a sample
 # But primer and sample data will be taken from .csv file
-
-#TOMEK"S CHANGE
-my $working_dir;
-$working_dir = getcwd();
-#print($working_dir);
-mkdir("${working_dir}/tmp");
-#
-
 my $tmp_dir;
 # if (!defined($INP_cdr3_path) && (defined($INP_multifile) || defined($INP_filepath))){
 if (!defined($INP_cdr3_path) && (!defined($sampledata) || defined($INP_multifile) || defined($INP_filepath)) ){
@@ -352,7 +342,7 @@ if (!defined($INP_cdr3_path) && (!defined($sampledata) || defined($INP_multifile
 	# Uncompress the files in temporal folder
 	my $paired_read_files = [];
 	if (defined($INP_multifile)){
-		$tmp_dir = "${working_dir}/tmp/".random_file_name(); #here I changed - Tomek
+		$tmp_dir = "/tmp/".random_file_name();
 		$paired_read_files= extract_paired_read_files_from_multifiles(\@INP_read_files,$tmp_dir);
 		if (!@$paired_read_files){
 			$paired_read_files = [ read_files_from_path($tmp_dir) ];
@@ -538,9 +528,9 @@ if (!defined($INP_cdr3_path)) {
 		}
 		#print "\n";
 		# Removes temporal dir
-		# if (defined($tmp_dir)){
-		# 	`rm -rf $tmp_dir`;
-		# }
+		if (defined($tmp_dir)){
+			`rm -rf $tmp_dir`;
+		}
 	# If the DNA tags for each individual sample are specified in the amplicon data,
 	# then the CDR3 sequences are extracted from the input reads file or the paired-end files
 	} else {
@@ -1089,9 +1079,11 @@ my %cdr3_prots;
 my %count_singletons;
 if (!defined($INP_cdr3_path)) {
 	if (defined($INP_numis)){
-		printf("\nClustering %d UMIs from %d CDR3 sequences (max. subs. within UMI: %d, max. subs.: %d, keep singletons: %s).\n",$INP_numis,$count_cdr3,$INP_umi_errors,$INP_cluster_errors,$yes_no{$INP_singletons});
+		printf("\nClustering %d CDR3 sequences (UMIs: %s, max. subs. within UMI: %d, max. subs.: %d, keep singletons: %s).\n",$count_cdr3,$INP_numis,$INP_umi_errors,$INP_cluster_errors,$yes_no{$INP_singletons});
+	} elsif (defined($INP_umi_cluster) && length($INP_umi_cluster)>1){
+		printf("\nClustering %d CDR3 sequences (UMIs: %s, max. subs. within UMI: %d, max. subs.: %d, keep singletons: %s).\n",$count_cdr3,$INP_umi_cluster,$INP_umi_errors,$INP_cluster_errors,$yes_no{$INP_singletons});
 	} elsif (defined($INP_umi_cluster)){
-		printf("\nClustering UMIs from %d CDR3 sequences (max. subs. within UMI: %d, max. subs.: %d, keep singletons: %s).\n",$count_cdr3,$INP_umi_errors,$INP_cluster_errors,$yes_no{$INP_singletons});
+		printf("\nClustering %d CDR3 sequences (UMIs: %s, max. subs. within UMI: %d, max. subs.: %d, keep singletons: %s).\n",$count_cdr3,$yes_no{$INP_umi_cluster},$INP_umi_errors,$INP_cluster_errors,$yes_no{$INP_singletons});
 	} else {
 		printf("\nClustering %d CDR3 sequences (max. subs.: %d, keep singletons: %s).\n",$count_cdr3,$INP_cluster_errors,$yes_no{$INP_singletons});
 	}
@@ -1127,28 +1119,24 @@ if (!defined($INP_cdr3_path)) {
 	# printf("Total time: %.2fs\n\n",gettimeofday-$start_run);
 	if (defined($options{'umi_errors'})) {
 		foreach my $sample (@$samples){
-			my ($sample_correct_umis,$sample_incorrect_umis,$sample_singleton_umis) = (0,0,0);
+			my ($sample_correct_umis,$sample_incorrect_umis) = (0,0);
 			my @marker_count_umis;
 			foreach my $marker (@$markers){
-				my ($sample_correct_umis_,$sample_incorrect_umis_,$sample_singleton_umis_) = (0,0,0);
-				if (defined($seq_stats->{$sample}{$marker}{'umis_correct'})){
-					$sample_correct_umis_ = $seq_stats->{$sample}{$marker}{'umis_correct'};
+				my ($sample_correct_umis_,$sample_incorrect_umis_) = (0,0);
+				if (defined($seq_stats->{$sample}{$marker}{'correct'})){
+					$sample_correct_umis_ = $seq_stats->{$sample}{$marker}{'correct'};
 				}
-				if (defined($seq_stats->{$sample}{$marker}{'umis_incorrect'})){
-					$sample_incorrect_umis_ = $seq_stats->{$sample}{$marker}{'umis_incorrect'};
-				}
-				if (defined($seq_stats->{$sample}{$marker}{'umis_singletons'})){
-					$sample_singleton_umis_ = $seq_stats->{$sample}{$marker}{'umis_singletons'};
+				if (defined($seq_stats->{$sample}{$marker}{'incorrect'})){
+					$sample_incorrect_umis_ = $seq_stats->{$sample}{$marker}{'incorrect'};
 				}
 				$sample_correct_umis += $sample_correct_umis_;
 				$sample_incorrect_umis += $sample_incorrect_umis_;
-				$sample_singleton_umis += $sample_singleton_umis_;
-				push(@marker_count_umis, sprintf("%s: %d (incorrect: %d, singletons: %d)", $marker, $sample_correct_umis_, $sample_incorrect_umis_, $sample_singleton_umis_));
+				push(@marker_count_umis, sprintf("%s: %d (incorrect: %d)", $marker, $sample_correct_umis_, $sample_incorrect_umis_));
 			}
 			if (defined($options{'umi_limit'})){
-				printf("Sample '%s': %8d correct UMIs selected, %d incorrect and %d singleton UMIs discarded - %s.\n", $sample, $sample_correct_umis, $sample_incorrect_umis, $sample_singleton_umis, join(", ", @marker_count_umis));
+				printf("Sample '%s': %8d correct UMIs selected, %d incorrect UMIs discarded - %s.\n", $sample, $sample_correct_umis, $sample_incorrect_umis, join(", ", @marker_count_umis));
 			} else {
-				printf("Sample '%s': %8d correct UMIs found, %d incorrect and %d singleton UMIs discarded - %s.\n", $sample, $sample_correct_umis, $sample_incorrect_umis, $sample_singleton_umis, join(", ", @marker_count_umis));
+				printf("Sample '%s': %8d correct and %d incorrect UMIs found - %s.\n", $sample, $sample_correct_umis, $sample_incorrect_umis, join(", ", @marker_count_umis));
 			}
 		}
 		if (defined($INP_verbose)) {
@@ -1462,17 +1450,13 @@ if (!defined($INP_cdr3_path)) {
 		map $total_sample_singletons += $count_singletons{$_}, @$markers;
 		my @marker_count_singletons = map sprintf("%s: %d",$_, $count_singletons{$_}) , @$markers;
 		if (!defined($INP_onlystats)){
-			if (defined($INP_umi_cluster)) {
-				printf("Sample '%s': %8d clustered CDR3 sequences (%s) written into 'clustered.cdr3' files.\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s)); # , join(", ", values %{$output_files->{'clustered'}{$sample}})
-			} elsif ($INP_singletons) {
+			if ($INP_singletons) {
 				printf("Sample '%s': %8d clustered CDR3 sequences (%s) written into 'clustered.cdr3' files, kept %5d singletons (%s).\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s), $total_sample_singletons, join(", ",@marker_count_singletons)); # , join(", ", values %{$output_files->{'clustered'}{$sample}})
 			} else {
 				printf("Sample '%s': %8d clustered CDR3 sequences (%s) written into 'clustered.cdr3' files, removed %5d singletons (%s).\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s), $total_sample_singletons, join(", ",@marker_count_singletons)); # , join(", ", values %{$output_files->{'clustered'}{$sample}})
 			}
 		} else {
-			if (defined($INP_umi_cluster)) {
-				printf("Sample '%s': %8d clustered CDR3 sequences (%s).\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s));
-			} elsif ($INP_singletons) {
+			if ($INP_singletons) {
 				printf("Sample '%s': %8d clustered CDR3 sequences (%s), kept %5d singletons (%s).\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s), $total_sample_singletons, join(", ",@marker_count_singletons));
 			} else {
 				printf("Sample '%s': %8d clustered CDR3 sequences (%s), removed %5d singletons (%s).\n", $sample, $sample_count_cdr3s, join(", ",@marker_count_cdr3s), $total_sample_singletons, join(", ",@marker_count_singletons));
@@ -2642,7 +2626,6 @@ if (defined($INP_zip) && -d $INP_outpath && !is_folder_empty($INP_outpath)){
 	print "\nThere was some error in the analysis and no results were retrieved.\n\n";
 }
 
-`rm -r ./tmp`;
 
 exit;
 
@@ -2854,6 +2837,9 @@ sub extract_cdr3_seqs {
 				my $cdr3_to_segment_seqs;
 				while ((my $marker_, my $segment_seqs_) = each(%{$tcr_segments_->{$sample_}})){
 					while ((my $cdr3_, my $cdr3_segment_seqs_) = each(%$segment_seqs_)){
+if (!defined($cdr3_segment_seqs_->{'tcrv'}[0])){
+print '';
+}
 						$cdr3_to_segment_seqs->{$cdr3_} = most_frequent(@{$cdr3_segment_seqs_->{'tcrv'}});
 					}
 				}
@@ -2914,10 +2900,10 @@ sub extract_cdr3_seqs_with_threads {
 	push(@$options, 'quiet');
 	
 	# Splits reads file into smaller files to process them in parallel
-	my @splitted_read_files1 = split_fastq_file($read_files->[0],$threads_limit,$tmp_dir,'gzip');
+	my @splitted_read_files1 = split_fastq_file($read_files->[0],$threads_limit,undef,'gzip');
 	my @splitted_read_files2;
 	if (scalar @$read_files == 2){
-		@splitted_read_files2 = split_fastq_file($read_files->[1],$threads_limit,$tmp_dir,'gzip');
+		@splitted_read_files2 = split_fastq_file($read_files->[1],$threads_limit,undef,'gzip');
 	}
 
 	my @threads;
@@ -2990,9 +2976,9 @@ sub extract_cdr3_seqs_with_threads {
 # 	}
 
 	# Removes splitted files
-#	foreach my $file (@splitted_read_files1, @splitted_read_files2) {
-#		`rm $file`;
-#	}
+	foreach my $file (@splitted_read_files1, @splitted_read_files2) {
+		`rm $file`;
+	}
 
 	return ($cdr3_headers, $cdr3_seqs, $cdr3_qualities, $total_tcr_reads, $tcr_segments);
 
@@ -3349,6 +3335,9 @@ sub cluster_cdr3s {
 			}
 		}
 
+		# Counts the number of incorrect UMIs (less than half sequences after clustering)
+		my ($count_correct_umis, $count_incorrect_umis) = (0,0);
+
 		# Do not sort if we want to take a subset of random UMIs
 		my @sorted_umis;
 		if (!defined($options->{'umi_limit'})) {
@@ -3359,70 +3348,57 @@ sub cluster_cdr3s {
 
 		# Clusters sequences within the same UMI based in a max. number of substitutions
 		foreach my $umi (@sorted_umis){
-			# Singleton UMIs
-			if (scalar @{$umi_cdr3_seqs->{$umi}} == 1){
-				# Annotates number of sequences per UMI
-				$seq_stats->{'reads'}++;
-				# Annotates number of variants per UMI
-				$seq_stats->{'variants'}++;
-				# Annotates singleton UMIs
-				$seq_stats->{'umis_singletons'}++;
-				if (!defined($options->{'keep_singletons'})){
-					next;
-				}
-			} else {
-				my (@umi_seqs, @umi_headers);
-				foreach my $i (@{$umi_cdr3_seqs->{$umi}}){
-					push(@umi_seqs, $cdr3_seqs->[$i]);
-					push(@umi_headers, $cdr3_headers->[$i]);
-				}
-				# Annotates number of sequences per UMI
-				$seq_stats->{'reads'}{scalar @umi_seqs}++;
-				# Annotates number of variants per UMI
-				$seq_stats->{'variants'}{scalar unique(@umi_seqs)}++;
-
-				# Clusters UMI sequences, 1 cluster will be created with identical/similar sequences
-				my $umi_clusters_ = cluster_umi_seqs(\@umi_seqs,\@umi_headers,$options->{'umi_errors'});
-				
-				# Checks if at least half of the UMI sequences are similar to the dominant one
-				# If not the UMI is discarded
-				my $count_clustered_seqs = scalar @{$umi_clusters_->{(keys %$umi_clusters_)[0]}};
-				# Counts the number of incorrect UMIs (less than half sequences after clustering)
-				# UMIs that are singletons are removed unless it is specified
-				# if ($count_clustered_seqs==1 || 2*$count_clustered_seqs <= scalar @umi_seqs) {
-				if (2*$count_clustered_seqs <= scalar @umi_seqs){
-					$seq_stats->{'umis_incorrect'}++;
-					if (!defined($options->{'keep_singletons'})){
-						next;
-					}
-				} else {
-					$seq_stats->{'umis_correct'}++;
-				}
-				
-				# Annotates the sequences from the first UMI cluster assigning the sequence of the dominant one
-				# Only 1 $dominant_seq, UMIs clustering generates a unique cluster
-				my $dominant_seq = (keys %$umi_clusters_)[0];
-				foreach my $header (@{$umi_clusters_->{$dominant_seq}}){
-					push(@cdr3_headers_,$header);
-					# Includes in sequences array the dominant sequence for further clustering
-					push(@cdr3_seqs_,$dominant_seq);
-					$count_clustered_seqs++;
-				}
-	# 			# Corrects all the UMI clustered sequences assigning the sequence of the dominant one
-	# 			foreach my $dominant_seq (keys %$umi_clusters_) { # Only 1 $dominant_seq, UMIs clustering generates a unique cluster
-	# 				foreach my $header (@{$umi_clusters_->{$dominant_seq}}){
-	# 					push(@cdr3_headers_,$header);
-	# 					# Includes in sequences array the dominant sequence for further clustering
-	# 					push(@cdr3_seqs_,$dominant_seq);
-	# 					$count_clustered_seqs++;
-	# 				}
-	# 			}
+			my (@umi_seqs, @umi_headers);
+			foreach my $i (@{$umi_cdr3_seqs->{$umi}}){
+				push(@umi_seqs, $cdr3_seqs->[$i]);
+				push(@umi_headers, $cdr3_headers->[$i]);
 			}
+			# Annotates number of sequences per UMI
+			$seq_stats->{'reads'}{scalar @umi_seqs}++;
+			# Annotates number of variants per UMI
+			$seq_stats->{'variants'}{scalar unique(@umi_seqs)}++;
+	
+			# Clusters UMI sequences, 1 cluster will be created with identical/similar sequences
+			my $umi_clusters_ = cluster_umi_seqs(\@umi_seqs,\@umi_headers,$options->{'umi_errors'});
+			
+			# Checks if at least half of the UMI sequences are similar to the dominant one
+			# If not the UMI is discarded
+			my $count_clustered_seqs = scalar @{$umi_clusters_->{(keys %$umi_clusters_)[0]}};
+			# Counts the number of incorrect UMIs (less than half sequences after clustering)
+			# UMIs that are singletons are removed unless it is specified
+			# if ($count_clustered_seqs==1 || 2*$count_clustered_seqs <= scalar @umi_seqs) {
+			if (2*$count_clustered_seqs <= scalar @umi_seqs || ($count_clustered_seqs == 1 && !defined($options->{'keep_singletons'})) ) {
+				$count_incorrect_umis++;
+				next;
+			} else {
+				$count_correct_umis++;
+			}
+			
+			# Annotates the sequences from the first UMI cluster assigning the sequence of the dominant one
+			# Only 1 $dominant_seq, UMIs clustering generates a unique cluster
+			my $dominant_seq = (keys %$umi_clusters_)[0];
+			foreach my $header (@{$umi_clusters_->{$dominant_seq}}){
+				push(@cdr3_headers_,$header);
+				# Includes in sequences array the dominant sequence for further clustering
+				push(@cdr3_seqs_,$dominant_seq);
+				$count_clustered_seqs++;
+			}
+# 			# Corrects all the UMI clustered sequences assigning the sequence of the dominant one
+# 			foreach my $dominant_seq (keys %$umi_clusters_) { # Only 1 $dominant_seq, UMIs clustering generates a unique cluster
+# 				foreach my $header (@{$umi_clusters_->{$dominant_seq}}){
+# 					push(@cdr3_headers_,$header);
+# 					# Includes in sequences array the dominant sequence for further clustering
+# 					push(@cdr3_seqs_,$dominant_seq);
+# 					$count_clustered_seqs++;
+# 				}
+# 			}
 			# Stops if a fix number of UMIs per sample is desired
-			if (defined($options->{'umi_limit'}) && $seq_stats->{'umis_correct'} == $options->{'umi_limit'}) {
+			if (defined($options->{'umi_limit'}) && $count_correct_umis == $options->{'umi_limit'}) {
 				last;
 			}
 		}
+		$seq_stats->{'correct'} = $count_correct_umis;
+		$seq_stats->{'incorrect'} = $count_incorrect_umis;
 	} else {
 		@cdr3_seqs_ = @$cdr3_seqs;
 		@cdr3_headers_ = @$cdr3_headers;

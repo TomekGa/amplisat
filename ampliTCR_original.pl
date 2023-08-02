@@ -11,15 +11,13 @@
 #    perl ampliTCR.pl -d -p -debug -thr 30 -vpat 'C.{60,}?C' -i TCR-126_S1_merged.fq.gz -o TCR_126 -vref unique_TCRBV.fa
 #    perl ampliTCR.pl -d -p -regex -vpat 'C\w{10,12}Y\w[QK]\w{37,40}[LMI]\w{12}[YL]\wC' -debug -thr 30 -i TCR-126_S1_merged.fq.gz -o TCR_126 -vref unique_TCRBV.fa
 
-
 my $VERSION = "1.2";
 my $SCRIPT_NAME = fileparse($0);
 my $AUTHOR = "Alvaro Sebastian";
 my $DESCRIPTION = "Analyzes a set of genomic or transcriptomic TCR sequences recognizing and extracting their Variable, Joining, Diversity, CDR3 and/or Constant segments.";
 
 # Modules are in folder '../' in the path of the script
-use FindBin; #modified - Tomek
-use lib "$FindBin::Bin/lib"; #modified - Tomek - forcing script to look for perl packages inside amplisas folder
+use lib "lib";
 use File::FindLib 'lib';
 # Perl modules necessaries for the correct working of the script
 use Cwd;
@@ -237,16 +235,12 @@ if (!defined($INP_debug) && !defined($INP_zip)){
 }
 
 # Saves into an array the files to process
-
-#TOMEK"S CHANGE
-mkdir('./tmp');
-#
 my @file_list = ($INP_reads_file);
 my ($tmp_dir_name,$tmp_dir,@outfiles);
 if (defined($INP_multifile)){
 	# Uncompress the files in temporal folder
 	$tmp_dir_name = random_file_name();
-	$tmp_dir = "./tmp/".$tmp_dir_name;
+	$tmp_dir = "/tmp/".$tmp_dir_name;
 	@file_list = decompress($INP_multifile,undef,$tmp_dir);
 }
 
@@ -268,7 +262,7 @@ while (my $file = shift @file_list){
 	if (defined($INP_outpath)){
 		$outpath = $INP_outpath."/".$outpath;
 	}
-	#print $outpath;
+
 	# Checks format and number or reads
 	my ($seqs_file_format,$total_reads)
 	= parse_sequence_file($file,undef,['verbose','stats']);
@@ -332,8 +326,8 @@ if (defined($INP_zip) && @output_files){
 }
 
 
-`rm -r ./tmp`;
-`rm -r '$INP_outpath'`;
+
+
 exit;
 
 
