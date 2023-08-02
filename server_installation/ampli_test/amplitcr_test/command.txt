@@ -1,0 +1,4 @@
+Command to check ampliTCR.pl
+Remember to include the full path to the script!
+
+~/amplisat/ampliTCR.pl -thr 20 -z -i amplitcr_example.fq.gz -o test1 -d amplisas -vpat 'Qx[PS]x(14)Cx(10,11)WYx(39,42)[LM]x(14)C' -jpat 'GxGx(2)Lx[VI]' -cpat 'EDL*'

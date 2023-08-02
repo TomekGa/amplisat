@@ -1,0 +1,6 @@
+Amplicon	Total	Unique	Reads-clustered	Variants-clustered	Reads-filtered	Variants-filtered
+MHC2-S1	426	67	418	4	413	2
+MHC2-S2	411	124	395	9	352	3
+MHC2-S3	387	78	384	1	384	1
+MHC2-S4	352	81	350	1	350	1
+MHC2-S5	457	140	439	11	389	5
