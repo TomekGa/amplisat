@@ -35,7 +35,8 @@ my $AUTHOR = "Alvaro Sebastian";
 my $DESCRIPTION = "Performs genotyping of amplicon sequencing data by clustering errors and filtering artefacts following a 3-step based analysis: de-multiplexing, clustering and filtering.";
 
 # Modules are in folder 'lib' in the path of the script
-use lib "lib";
+use FindBin; #modified - Tomek
+use lib "$FindBin::Bin/lib"; #modified - Tomek - forcing script to look for perl packages inside amplisas folder
 use File::FindLib 'lib';
 # Perl modules necessaries for the correct working of the script
 use Cwd;
@@ -44,6 +45,10 @@ use Getopt::Long;
 use Bio::Sequences;
 use Bio::Ampli;
 use Data::Dumper;
+
+#TOMEK"S CHANGE
+mkdir('./tmp');
+#
 
 # All variables must be declared before their use
 use strict;
@@ -86,7 +91,7 @@ my $TECH_PARAMS = {
 		'indel_threshold' => { 'all' => [ '0.001' ] },
 		'min_dominant_frequency_threshold' => { 'all' => [ '25' ] },
 		# 'cluster_inframe' => { 'all' => [ '1' ] },
-		'min_amplicon_seq_frequency' => { 'all' => [ '3' ] },
+		'min_amplicon_seq_frequency' => { 'all' => [ '0.25' ] },
 		'min_chimera_length' => { 'all' => [ '10' ] },
 	},
 	'unknown' => { # Unknown technology
@@ -96,6 +101,7 @@ my $TECH_PARAMS = {
 		# 'cluster_inframe' => { 'all' => [ '1' ] },
 		'min_amplicon_seq_frequency' => { 'all' => [ '3' ] },
 		'min_chimera_length' => { 'all' => [ '10' ] },
+		'min_amplicon_depth' => { 'all' => [ '2000' ] },
 	}
 };
 $TECH_PARAMS->{'454/iontorrent'} = $TECH_PARAMS->{'454'} = $TECH_PARAMS->{'iontorrent'} = $TECH_PARAMS->{'pyroseq'};
@@ -174,6 +180,8 @@ sub usage {
 }
 
 amplisas();
+
+`rm -r ./tmp`;
 
 exit;
 
@@ -340,7 +348,7 @@ sub amplisas {
 		}
 		# Sets keeping singletons parameter if it's specified in command line
 		if (defined($INP_keepsingletons)){
-			$paramsdata->{'keep_singletons'}{'all'} = [ 'yes' ];
+			$paramsdata->{'keep_singletons'}{'all'} = [ $INP_keepsingletons ];
 		}
 		# Read always the params from CSV file, they will have priority over auto ones
 		# Clustering parameters are mandatory
@@ -431,7 +439,7 @@ sub amplisas {
 				undef($read_headers);
 				print "\nDe-multiplexing amplicon sequences from reads.\n";
 				# Creates a file with all sequences
-				my $raw_seqs_file = write_to_file("/tmp/".random_file_name(),join("\n",@{$read_seqs}));
+				my $raw_seqs_file = write_to_file("./tmp/".random_file_name(),join("\n",@{$read_seqs}));
 				my $match_options;
 				if (!$INP_revcomp) {
 					push(@$match_options, 'direct');
@@ -546,7 +554,7 @@ sub amplisas {
 
 	# Align sequences to alleles and assign allele names to sequences
 	# Alleles are only assigned if demultiplexing is the last step
-	if (defined($alleledata) && %$alleledata && (defined($INP_verbose) || (defined($INP_nocluster) && defined($INP_nofilter)))){
+	if (defined($alleledata) && %$alleledata && defined($INP_nocluster) && defined($INP_nofilter)){
 		print "\nMatching allele sequences.\n";
 		$md5_to_name = match_alleles($alleledata,$md5_to_sequence,$md5_to_name,\%INP_allele_align_params,$INP_threads);
 	}
@@ -774,7 +782,7 @@ sub amplisas {
 		# Writes FASTA files with real allele sequences and artifacts clustered together
 		# And annotates in $amplicon_clusters the number of members per cluster (for filtering purposes)
 		# $amplicon_clusters->{$marker_name}{$sample_name}{$md5} = $count_members;
-		# if (defined($INP_verbose)){
+		if (defined($INP_verbose)){
 			print "\nPrinting information about clustered and not clustered sequences into '$INP_outpath_clustered'.\n";
 			foreach my $marker_name (@$markers){
 				if (!defined($clusters->{$marker_name})){
@@ -847,37 +855,37 @@ sub amplisas {
 					}
 				}
 			}
-# 		# Only annotates cluster sizes
-# 		} else {
-# 			foreach my $marker_name (@$markers){
-# 				if (!defined($clusters->{$marker_name})){
-# 					next;
-# 				}
-# 				foreach my $sample_name (@{$samples->{$marker_name}}) {
-# 					if (!defined($clusters->{$marker_name}{$sample_name})){
-# 						next;
-# 					}
-# 					foreach my $cluster (@{$clusters->{$marker_name}{$sample_name}}) {
-# 						my $count_members = 0;
+		# Only annotates cluster sizes
+		} else {
+			foreach my $marker_name (@$markers){
+				if (!defined($clusters->{$marker_name})){
+					next;
+				}
+				foreach my $sample_name (@{$samples->{$marker_name}}) {
+					if (!defined($clusters->{$marker_name}{$sample_name})){
+						next;
+					}
+					foreach my $cluster (@{$clusters->{$marker_name}{$sample_name}}) {
+						my $count_members = 0;
+						foreach my $cluster_member (@$cluster) {
+							$count_members++;
+						}
+						# Do not save non clustered sequences
+						if ($cluster->[0]{'errors'} ne 'no cluster'){
+							$amplicon_clusters->{$marker_name}{$sample_name}{$cluster->[0]{'md5'}} = $count_members;
+						}
+						# Includes consensus sequences into $md5_to_sequence and into RAW data
 # 						foreach my $cluster_member (@$cluster) {
-# 							$count_members++;
+# 							my $md5 = $cluster_member->{'md5'};
+# 							my $seq = $cluster_member->{'seq'};
+# 							if (!defined($md5_to_sequence->{$md5})){
+# 								$md5_to_sequence->{$md5} = $seq;
+# 							}
 # 						}
-# 						# Do not save non clustered sequences
-# 						if ($cluster->[0]{'errors'} ne 'no cluster'){
-# 							$amplicon_clusters->{$marker_name}{$sample_name}{$cluster->[0]{'md5'}} = $count_members;
-# 						}
-# 						# Includes consensus sequences into $md5_to_sequence and into RAW data
-# # 						foreach my $cluster_member (@$cluster) {
-# # 							my $md5 = $cluster_member->{'md5'};
-# # 							my $seq = $cluster_member->{'seq'};
-# # 							if (!defined($md5_to_sequence->{$md5})){
-# # 								$md5_to_sequence->{$md5} = $seq;
-# # 							}
-# # 						}
-# 					}
-# 				}
-# 			}
-# 		}
+					}
+				}
+			}
+		}
 		undef($clusters);
 		
 		# If no clusters are retrieved, it will be probably because wrong sequences lengths specified in the input
@@ -888,7 +896,7 @@ sub amplisas {
 
 		# Aligns sequences to alleles and assign allele names to sequences
 		# Alleles are only assigned if clustering is the last step
-		if (defined($alleledata) && %$alleledata && (defined($INP_verbose) || defined($INP_nofilter))){
+		if (defined($alleledata) && %$alleledata && defined($INP_nofilter)){
 			print "\nMatching allele sequences.\n";
 			$md5_to_name = match_alleles($alleledata,$md5_to_sequence,$md5_to_name,\%INP_allele_align_params,$INP_threads);
 		}
@@ -1086,7 +1094,7 @@ sub amplisas {
 			}
 		}
 		# Writes FASTA files with real allele sequences and artifacts clustered together
-# 		if (defined($INP_verbose)){
+		if (defined($INP_verbose)){
 			print "\nPrinting information about filtered and non filtered sequences into '$INP_outpath_filtered'.\n";
 			foreach my $marker_name (@$markers){
 				if (!defined($filters_output->{$marker_name})){
@@ -1099,7 +1107,7 @@ sub amplisas {
 					write_to_file("$INP_outpath_filtered/$marker_name-$sample_name.verbose.fasta",$filters_output->{$marker_name}{$sample_name});
 				}
 			}
-# 		}
+		}
 		if (!(%$amplicon_filtered_sequences)){
 			`rm -rf $INP_outpath`;
 			print "\nERROR: No sequences passed the filters, please choose broader filtering values.\n\n";
