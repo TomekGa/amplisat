@@ -977,7 +977,7 @@ sub download_file {
 	my ($url,$outfile) = @_;
 
 	if (!defined($outfile)){
-		$outfile="./tmp/".random_file_name();
+		$outfile="/tmp/".random_file_name();
 	}
 
 	#print "wget -q -O $outfile $url\n";exit;
@@ -1243,7 +1243,7 @@ sub extract_paired_read_files_from_multifiles {
 	
 	# Uncompress the files in temporal folder
 	if (!defined($outdir)){
-		$outdir = "./tmp/".random_file_name();
+		$outdir = "/tmp/".random_file_name();
 	}
 
 	# Checks if the input file is a set of packed files (.zip or .tar.gz/.tgz)
@@ -1427,7 +1427,7 @@ sub compress {
 		$type = 'zip';
 	}
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name();
+		$outfile = "/tmp/".random_file_name();
 	}
 
 	my $output;
@@ -1501,7 +1501,7 @@ sub decompress {
 		}
 	}
 	if (!defined($outpath)){
-		$outpath = "./tmp/".random_file_name();
+		$outpath = "/tmp/".random_file_name();
 	}
 	my $is_multifile = is_multifile($infile);
 	
@@ -2141,7 +2141,7 @@ sub create_fasta_file {
 	my ($seqs,$headers,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name().".fasta";
+		$outfile = "/tmp/".random_file_name().".fasta";
 	} elsif ($outfile =~ /\.zip$/){
 		$compress_type = 'zip';
 	} elsif ($outfile =~ /\.(gzip|gz)$/){
@@ -2193,7 +2193,7 @@ sub create_fastq_file {
 	my ($seqs,$headers,$quals,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name().".fastq";
+		$outfile = "/tmp/".random_file_name().".fastq";
 	}
 
 	if (!defined($compress_type)){
@@ -2319,7 +2319,7 @@ sub shuffle_fasta_file {
 	my ($file,$nseqs,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name().'.fa';
+		$outfile = "/tmp/".random_file_name().'.fa';
 	}
 
 	my $cat_exe = 'cat';
@@ -2357,7 +2357,7 @@ sub shuffle_fastq_file {
 	my ($file,$nseqs,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name().'.fq';
+		$outfile = "/tmp/".random_file_name().'.fq';
 	}
 
 	my $cat_exe = 'cat';
@@ -2397,7 +2397,7 @@ sub shuffle_fastq_files {
 
 	if (!defined($outfiles)){
 		my $random_name = random_file_name();
-		$outfiles = [ "./tmp/$random_name\_R1.fq", "./tmp/$random_name\_R2.fq" ];
+		$outfiles = [ "/tmp/$random_name\_R1.fq", "/tmp/$random_name\_R2.fq" ];
 	}
 
 	my $subsample_exe = 'fq_subsample.py';
@@ -2428,7 +2428,7 @@ sub split_fasta_file {
 	my ($file,$parts,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name();
+		$outfile = "/tmp/".random_file_name();
 	}
 	
 	my $total_lines;
@@ -2456,7 +2456,7 @@ sub split_fastq_file {
 	my ($file,$parts,$outfile,$compress_type) = @_;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name();
+		$outfile = "/tmp/".random_file_name();
 	}
 	
 	my $total_lines;
@@ -2486,7 +2486,7 @@ sub split_file {
 	my @splitted_files;
 
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name();
+		$outfile = "/tmp/".random_file_name();
 	}
 
 	my $cat_exe = 'cat';
@@ -2692,7 +2692,7 @@ sub extract_random_seqs_from_fasta {
 
 	my ($file, $number) = @_;
 	
-	my $outfile = "./tmp/".random_file_name().".fa";
+	my $outfile = "/tmp/".random_file_name().".fa";
 
 	my $cat_exe = 'cat';
 	if (is_gzip($file) || is_zip($file)){
@@ -2718,7 +2718,7 @@ sub extract_random_seqs_from_fastq {
 
 	my ($file, $number, $read_qualities) = @_;
 	
-	my $outfile = "./tmp/".random_file_name().".fq";
+	my $outfile = "/tmp/".random_file_name().".fq";
 
 	my $cat_exe = 'cat';
 	if (is_gzip($file) || is_zip($file)){
@@ -4839,7 +4839,7 @@ sub align_seqs2one {
 	}
 	$align_type =~ s/\s+//g;
 
-	my $outfile = sprintf("./tmp/%s.align",random_file_name());
+	my $outfile = sprintf("/tmp/%s.align",random_file_name());
 	unlink($outfile);
 
 	if ($align_type =~ /global|needleall/){
@@ -4925,7 +4925,7 @@ sub align_seqs2seqs {
 		$align_type='global';
 	}
 
-	my $outfile = sprintf("./tmp/%s.align",random_file_name());
+	my $outfile = sprintf("/tmp/%s.align",random_file_name());
 	unlink($outfile);
 
 	if ($align_type =~ /global|needleall/){
@@ -5223,7 +5223,7 @@ sub cluster_umi_seqs {
 sub execute_blastp {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
-	#print "HELLO I AM HERE";
+
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
 	if (!defined($blast_options)){$blast_options='';}
@@ -5231,24 +5231,20 @@ sub execute_blastp {
 	my $random_name = random_file_name();
 
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name.blast";
+		$outfile="/tmp/$random_name.blast";
 	}
 	unlink($outfile);
 
 	my $blastdb_file;
 	if ($sbjct_file eq $NCBI_NR_DATABASE) {
 		$blastdb_file = $NCBI_NR_DATABASE;
-		print "GO -1";
 	} elsif (-e "$sbjct_file.phr" && -e "$sbjct_file.pin" && -e "$sbjct_file.psq") {
-		print "GO 0";
 		$blastdb_file = $sbjct_file;
 	} elsif (is_compressed($sbjct_file)) {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
-		print "GO 1";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		`zcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype prot -out '$blastdb_file' 2>&1`;
 	} else {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
-		print "GO 2";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		# print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype prot -out '$blastdb_file'\n"; exit;
 # 		system("$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype prot -out '$blastdb_file' > /dev/null");
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype prot -out '$blastdb_file' 2>&1`;
@@ -5276,7 +5272,6 @@ sub execute_blastpshort {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
 
-	#print "HELLO I AM HERE";
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
 	if (!defined($blast_options)){$blast_options='';}
@@ -5284,7 +5279,7 @@ sub execute_blastpshort {
 	my $random_name = random_file_name();
 
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name.blast";
+		$outfile="/tmp/$random_name.blast";
 	}
 	unlink($outfile);
 
@@ -5294,10 +5289,10 @@ sub execute_blastpshort {
 	} elsif (-e "$sbjct_file.phr" && -e "$sbjct_file.pin" && -e "$sbjct_file.psq") {
 		$blastdb_file = $sbjct_file;
 	} elsif (is_compressed($sbjct_file)) {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		`zcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype prot -out '$blastdb_file' 2>&1`;
 	} else {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 # 		print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype prot -out '$blastdb_file'\n"; exit;
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype prot -out '$blastdb_file' 2>&1`;
 	}
@@ -5324,7 +5319,6 @@ sub execute_blastn {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
 
-	#print "HELLO BLASTN";
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
 	if (!defined($blast_options)){$blast_options='';}
@@ -5332,22 +5326,22 @@ sub execute_blastn {
 	my $random_name = random_file_name();
 
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name.blast";
+		$outfile="/tmp/$random_name.blast";
 	}
 	unlink($outfile);
-	#print $outfile;
+
 	my $blastdb_file;
 	if ($sbjct_file eq $NCBI_NT_DATABASE) {
 		$blastdb_file = $NCBI_NT_DATABASE;
 	} elsif (-e "$sbjct_file.nhr" && -e "$sbjct_file.nin" && -e "$sbjct_file.nsq") {
 		$blastdb_file = $sbjct_file;
 	} elsif (is_compressed($sbjct_file)) {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		#print "\nzcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype nucl -out '$blastdb_file'\n";
 		`zcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	} else {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
-		#print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file'\n";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
+		# print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file'\n"; exit;
 # 		system("$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' > /dev/null");
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	}
@@ -5375,7 +5369,7 @@ sub execute_blastn {
 sub execute_blastnshort {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
-	#print "HELLO I AM HERE";
+
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
 	if (!defined($blast_options)){$blast_options='';}
@@ -5383,7 +5377,7 @@ sub execute_blastnshort {
 	my $random_name = random_file_name();
 
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name.blast";
+		$outfile="/tmp/$random_name.blast";
 	}
 	unlink($outfile);
 
@@ -5393,10 +5387,10 @@ sub execute_blastnshort {
 	} elsif (-e "$sbjct_file.nhr" && -e "$sbjct_file.nin" && -e "$sbjct_file.nsq") {
 		$blastdb_file = $sbjct_file;
 	} elsif (is_compressed($sbjct_file)) {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		`zcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	} else {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 # 		print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file'\n"; exit;
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	}
@@ -5422,7 +5416,7 @@ sub execute_blastnshort {
 sub execute_megablast {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
-	#print "HELLO I AM HERE";
+
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
 	if (!defined($blast_options)){$blast_options='';}
@@ -5430,7 +5424,7 @@ sub execute_megablast {
 	my $random_name = random_file_name();
 
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name.blast";
+		$outfile="/tmp/$random_name.blast";
 	}
 	unlink($outfile);
 
@@ -5440,10 +5434,10 @@ sub execute_megablast {
 	} elsif (-e "$sbjct_file.nhr" && -e "$sbjct_file.nin" && -e "$sbjct_file.nsq") {
 		$blastdb_file = $sbjct_file;
 	} elsif (is_compressed($sbjct_file)) {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 		`zcat '$sbjct_file' | $MAKEBLASTDBEXE -in - -title 'BLASTDB' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	} else {
-		$blastdb_file = "./tmp/align_seqs_$random_name.db";
+		$blastdb_file = "/tmp/align_seqs_$random_name.db";
 # 		print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file'\n"; exit;
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	}
@@ -5476,7 +5470,7 @@ sub execute_gassst {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.gassst";
+		$outfile="/tmp/$random_name.gassst";
 	}
 	if (-e $outfile){
 		`rm "$outfile"`;
@@ -5508,7 +5502,7 @@ sub execute_bwa {
 	if (defined($outfile)){
 		$outfile =~ s/\.bam$//; # Bowtie adds the extension automatically
 	} else {
-		$outfile="./tmp/$random_name.bwa";
+		$outfile="/tmp/$random_name.bwa";
 	}
 	unlink($outfile);
 
@@ -5528,7 +5522,7 @@ sub execute_bwa {
 		&& -e "$sbjct_file.amb" && -e "$sbjct_file.sa") {
 		$bwadb_file = $1;
 	} else {
-		$bwadb_file = "./tmp/align_seqs_$random_name.db";
+		$bwadb_file = "/tmp/align_seqs_$random_name.db";
 		# print "\n$BWABUILDEXE '$sbjct_file' '$bwadb_file'\n"; exit;
 		`$BWABUILDEXE -p '$bwadb_file' '$sbjct_file' 2>&1`;
 	}
@@ -5577,7 +5571,7 @@ sub execute_bowtie {
 	if (defined($outfile)){
 		$outfile =~ s/\.bam$//; # Bowtie adds the extension automatically
 	} else {
-		$outfile="./tmp/$random_name.bowtie";
+		$outfile="/tmp/$random_name.bowtie";
 	}
 	unlink($outfile);
 
@@ -5597,13 +5591,13 @@ sub execute_bowtie {
 		&& -e "$sbjct_file.4.ebwt" && -e "$sbjct_file.rev.1.ebwt"  && -e "$sbjct_file.rev.2.ebwt") {
 		$bowtiedb_file = $1;
 	} elsif (is_compressed($sbjct_file)) {
-		$bowtiedb_file = "./tmp/align_seqs_$random_name.db";
+		$bowtiedb_file = "/tmp/align_seqs_$random_name.db";
 		my $sbjct_file_ = decompress($sbjct_file);
 		# print "\n$BOWTIEBUILDEXE '$sbjct_file_' '$bowtiedb_file'\n";exit;
 		`$BOWTIEBUILDEXE '$sbjct_file_' '$bowtiedb_file' 2>&1`;
 		`rm $sbjct_file_`;
 	} else {
-		$bowtiedb_file = "./tmp/align_seqs_$random_name.db";
+		$bowtiedb_file = "/tmp/align_seqs_$random_name.db";
 		# print "\n$BOWTIEBUILDEXE '$sbjct_file' '$bowtiedb_file'\n"; exit;
 		`$BOWTIEBUILDEXE '$sbjct_file' '$bowtiedb_file' 2>&1`;
 	}
@@ -5668,7 +5662,7 @@ sub execute_bowtie2 {
 	if (defined($outfile)){
 		$outfile =~ s/\.bam$//; # Bowtie adds the extension automatically
 	} else {
-		$outfile="./tmp/$random_name.bowtie2";
+		$outfile="/tmp/$random_name.bowtie2";
 	}
 	unlink($outfile);
 
@@ -5688,11 +5682,11 @@ sub execute_bowtie2 {
 		&& -e "$sbjct_file.4.bt2" && -e "$sbjct_file.rev.1.bt2"  && -e "$sbjct_file.rev.2.bt2") {
 		$bowtie2db_file = $1;
 	} elsif (is_compressed($sbjct_file)) {
-		$bowtie2db_file = "./tmp/align_seqs_$random_name.db";
+		$bowtie2db_file = "/tmp/align_seqs_$random_name.db";
 # 		print "\nzcat '$sbjct_file' | $BOWTIE2BUILDEXE '$bowtie2db_file'\n"; exit;
 		`zcat '$sbjct_file' | $BOWTIE2BUILDEXE '$bowtie2db_file' 2>&1`;
 	} else {
-		$bowtie2db_file = "./tmp/align_seqs_$random_name.db";
+		$bowtie2db_file = "/tmp/align_seqs_$random_name.db";
 		# print "\n$BOWTIE2BUILDEXE '$sbjct_file' '$bowtie2db_file'\n"; exit;
 		`$BOWTIE2BUILDEXE '$sbjct_file' '$bowtie2db_file' 2>&1`;
 	}
@@ -5761,7 +5755,7 @@ sub execute_samtools {
 
 	my $random_name = random_file_name();
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name";
+		$outfile="/tmp/$random_name";
 	}
 
 	if ($options =~/^view/){
@@ -5792,7 +5786,7 @@ sub execute_bcftools {
 
 	my $random_name = random_file_name();
 	if (!defined($outfile)){
-		$outfile="./tmp/$random_name";
+		$outfile="/tmp/$random_name";
 	}
 	unlink($outfile);
 
@@ -5816,7 +5810,7 @@ sub execute_regex_match {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.regex";
+		$outfile="/tmp/$random_name.regex";
 	}
 	if (-e $outfile){
 		`rm "$outfile"`;
@@ -5859,7 +5853,7 @@ sub execute_cdhit {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.cdhit.fasta";
+		$outfile="/tmp/$random_name.cdhit.fasta";
 	}
 	unlink($outfile);
 
@@ -5890,7 +5884,7 @@ sub execute_cdhit_est {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.cdhit";
+		$outfile="/tmp/$random_name.cdhit";
 	}
 	unlink($outfile);
 
@@ -5921,7 +5915,7 @@ sub execute_cdhit_454 {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.cdhit";
+		$outfile="/tmp/$random_name.cdhit";
 	}
 	unlink($outfile);
 
@@ -5942,7 +5936,7 @@ sub execute_mafft {
 
 	if (!defined($outfile)){
 		my $random_name = random_file_name();
-		$outfile="./tmp/$random_name.mafft";
+		$outfile="/tmp/$random_name.mafft";
 	}
 	unlink($outfile);
 
@@ -5965,16 +5959,16 @@ sub execute_flash {
 	my $random_name = random_file_name();
 	if (!defined($outfile)){
 		my $random_name2 = random_file_name();
-		$outfile="./tmp/$random_name2.flash";
+		$outfile="/tmp/$random_name2.flash";
 	}
 	unlink($outfile);
 
 # 	print("$FLASHEXE -q -d /tmp $flash_options '$reads_file1' '$reads_file2' -o $random_name --suffix='' 1>&- 2>&-\n");exit;
-	`$FLASHEXE -q -d ./tmp $flash_options '$reads_file1' '$reads_file2' -o $random_name --suffix='' 2>&1`;
-	system("mv ./tmp/$random_name.extendedFrags.fastq $outfile");
+	`$FLASHEXE -q -d /tmp $flash_options '$reads_file1' '$reads_file2' -o $random_name --suffix='' 2>&1`;
+	system("mv /tmp/$random_name.extendedFrags.fastq $outfile");
 # 	system("mv /tmp/$random_name.notCombined_1.fastq $outfile.nc_1");
 # 	system("mv /tmp/$random_name.notCombined_2.fastq $outfile.nc_2");
-	system("rm ./tmp/$random_name.*");
+	system("rm /tmp/$random_name.*");
 
 # 	open(FLASH,"$FLASHEXE -q -c $flash_options '$reads_file1' '$reads_file2' |") || die "# $0 : cannot run $FLASHEXE\n";
 # 	my ($sequences,$headers,$qualities) = read_fastq([<FLASH>]);
@@ -7464,7 +7458,7 @@ sub execute_weblogo {
 		$outformat = uc($outformat);
 	}
 	if (!defined($outfile)){
-		$outfile = "./tmp/".random_file_name();
+		$outfile = "/tmp/".random_file_name();
 	}
 	if (!defined($options)){
 		$options = "-c classic -X NO -Y NO --fineprint '' -s large --resolution 300 --aspect-ratio 3 --errorbars NO";
