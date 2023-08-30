@@ -243,12 +243,12 @@ execute_weblogo
 
 # Routes to binary files and databases
 my $TOOLSDIR = dirname (__FILE__).'/tools/';
-my $BLASTPEXE = $TOOLSDIR.'blastp -task blastp'; # -num_threads 4";
-my $BLASTPSHORTEXE = $TOOLSDIR.'blastp -task blastp-short'; # -num_threads 4";
-my $BLASTNEXE = $TOOLSDIR.'blastn -task blastn'; # -num_threads 4";
-my $BLASTNSHORTEXE = $TOOLSDIR.'blastn -task blastn-short'; # -num_threads 4";
-my $MEGABLASTEXE = $TOOLSDIR.'blastn -task megablast'; # -num_threads 4";
-my $MAKEBLASTDBEXE = $TOOLSDIR.'makeblastdb';
+my $BLASTPEXE = 'blastp -task blastp'; # -num_threads 4";
+my $BLASTPSHORTEXE = 'blastp -task blastp-short'; # -num_threads 4";
+my $BLASTNEXE = 'blastn -task blastn'; # -num_threads 4";
+my $BLASTNSHORTEXE = 'blastn -task blastn-short'; # -num_threads 4";
+my $MEGABLASTEXE = 'blastn -task megablast'; # -num_threads 4";
+my $MAKEBLASTDBEXE = 'makeblastdb';
 my $NCBI_NR_DATABASE = '/data/ncbi/nr'; # non-redundant protein
 my $NCBI_NT_DATABASE = '/data/ncbi/nt'; # non-redundant nucleotide
 my $GASSSTEXE = $TOOLSDIR.'gassst -m 0'; # Blast like format (human readable)
@@ -4348,6 +4348,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna blastn-short -evalue 0.001'
 	if ($align_type eq 'dna' && $align_params =~ /short/i){
+		#print("1");
 		if ($align_params =~ /short\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4359,17 +4360,20 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna blastn -evalue 0.001'
 	} elsif ($align_type eq 'dna' && $align_params =~ /blastn/i){
+		#print("2");
 		if ($align_params =~ /blastn\s+(.+)/i){
 			$align_params = $1;
 		} else {
 			$align_params = '';
 		} 
 		$align_file = execute_blastn($query_file,$sbjct_file,$maxhits,$align_params);
+		#print("PROBLEM");
 		my $blast_data = extract_blast_data($align_file,$maxhits,$format);
 		$align_data = extract_align_blast_data($blast_data);
 
 	# If $align_options = 'prot blastp-short -evalue 0.001'
 	} elsif ($align_type eq 'prot' && $align_params =~ /short/i){
+		#print("3");
 		if ($align_params =~ /short\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4381,6 +4385,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'prot blastp -evalue 0.001'
 	} elsif ($align_type eq 'prot' && $align_params =~ /blastp/i){
+		#print("4");
 		if ($align_params =~ /blastp\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4392,6 +4397,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna megablast -evalue 0.001'
 	} elsif ($align_type eq 'dna' && $align_params =~ /megablast/i){
+		#print("5");
 		if ($align_params =~ /megablast\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4403,6 +4409,7 @@ sub align_seqs_from_file {
 	
 	# If $align_options = 'dna bwa'
 	} elsif ($align_type eq 'dna' && $align_params =~ /bwa/i){
+		#print("6");
 		if ($align_params =~ /bwa\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4413,6 +4420,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna bowtie'
 	} elsif ($align_type eq 'dna' && $align_params =~ /bowtie/i){
+		#print("7");
 		if ($align_params =~ /bowtie\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4423,6 +4431,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna bowtie2'
 	} elsif ($align_type eq 'dna' && $align_params =~ /bowtie2/i){
+		#print("8");
 		if ($align_params =~ /bowtie2\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4433,6 +4442,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna gassst -r 0 -p 80'
 	} elsif ($align_type eq 'dna' && $align_params =~ /gassst/i){
+		#print("9");
 		if ($align_params =~ /gassst\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4444,6 +4454,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna regex -r 0 -p 80'
 	} elsif ($align_type eq 'dna' && $align_params =~ /regex/i){
+		#print("10");
 		if ($align_params =~ /regex\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4454,6 +4465,7 @@ sub align_seqs_from_file {
 
 	# If $align_options = 'dna match revcomp'
 	} elsif ($align_type eq 'dna' && $align_params =~ /match/i){
+		#print("11");
 		if ($align_params =~ /match\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -4526,7 +4538,6 @@ sub map_reads_from_files {
 
 # Align protein or DNA sequences
 sub align_seqs {
-
 	my ($query_names,$query_seqs,$sbjct_names,$sbjct_seqs,$maxhits,$align_options,$keep_align_file) = @_;
 
 	my ($align_data, $align_file);
@@ -4540,7 +4551,6 @@ sub align_seqs {
 	
 	# Creates FASTA files and runs the alignment software with 'align_seqs_from_file'
 	unless ($align_type eq 'dna' && $align_params =~ /match/i){
-
 		my $query_file = create_fasta_file($query_seqs,$query_names);
 		my $sbjct_file;
 		if (defined($sbjct_seqs) && defined($sbjct_names)){
@@ -4562,7 +4572,6 @@ sub align_seqs {
 	# If $align_type = 'dna match revcomp'
 	# FASTA files doesn't need to be created, there is no external software
 	} else {
-
 		if ($align_params =~ /match\s+(.+)/i){
 			$align_params = $1;
 		} else {
@@ -5323,7 +5332,7 @@ sub execute_blastpshort {
 sub execute_blastn {
 
 	my ($query_file,$sbjct_file,$maxhits,$blast_options,$outfile) = @_;
-
+	#print("\n${sbjct_file}\n\n");
 	#print "HELLO BLASTN";
 	if($maxhits){$maxhits = "-num_descriptions $maxhits -num_alignments $maxhits";}else{$maxhits='';} # "-num_descriptions $maxhits -num_alignments $maxhits"
 
@@ -5349,6 +5358,7 @@ sub execute_blastn {
 		$blastdb_file = "./tmp/align_seqs_$random_name.db";
 		#print "\n$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file'\n";
 # 		system("$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' > /dev/null");
+		#print("\n${MAKEBLASTDBEXE}\n\n");
 		`$MAKEBLASTDBEXE -in '$sbjct_file' -dbtype nucl -out '$blastdb_file' 2>&1`;
 	}
 	
@@ -5356,13 +5366,14 @@ sub execute_blastn {
 # 		print "\nzcat '$query_file' | $BLASTNEXE $blast_options $maxhits -query - -db '$blastdb_file' -out '$outfile'\n";exit;
 		`zcat '$query_file' | $BLASTNEXE $blast_options $maxhits -query - -db '$blastdb_file' -out '$outfile' 2>&1`;
 	} else{ 
-# 		print "\n$BLASTNEXE $blast_options $maxhits -query '$query_file' -db '$blastdb_file' -out '$outfile'\n";exit;
+		#print("TRUE");
+ 		#print "\n$BLASTNEXE $blast_options $maxhits -query '$query_file' -db '$blastdb_file' -out '$outfile'\n";
 	# 	system("$BLASTNEXE $blast_options $maxhits -query '$query_file' -db '$blastdb_file' -out '$outfile' > /dev/null");
 		`$BLASTNEXE $blast_options $maxhits -query '$query_file' -db '$blastdb_file' -out '$outfile' 2>&1`;
 	}
-
 	if ($blastdb_file =~ /\/tmp\/align_seqs_/) {
-		`rm $blastdb_file*`;
+		#print("\n${blastdb_file}\n");
+		#`rm $blastdb_file*`;
 	}
 
 	return $outfile;

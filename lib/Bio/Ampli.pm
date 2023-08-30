@@ -1622,7 +1622,6 @@ sub read_alleles {
 
 # Assigns alleles to sequences ($alleledata can be a HASH ref with allele data, a HASH ref with sequences or a FASTA/FASTQ file)
 sub match_alleles {
-
 	my ($alleledata,$md5_to_sequence,$md5_to_name,$options,$threads) = @_;
 
 	# Typical allele matching options
