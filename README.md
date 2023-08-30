@@ -87,17 +87,23 @@ THE SOFTWARE PROVIDED HEREIN IS ON AN “AS IS” BASIS, AND THE INVENTORS HAS N
 
 This part was developed by TG to enable the local installation of AmpliSAT software on the servers of the Institute of Environmental Sciences, Jagiellonian University in Kraków. The global installation was impossible due to security issues related to the Docker container. Note that until now, the only supported scripts on the servers are **ampliSAS.pl**, **ampliTCR.pl** and **ampliSAS.pl**. The main changes compared to the original scripts were to force them to look for lacking Perl modules in the parent directory and force them to create all temporary files locally.
 
-To install AmpliSAT on servers you should:
+To install AmpliSAT on servers you should (many thanks to Gemma who tested this):
 1. Download the repository to your local repository on the server.
+
+```
+wget https://github.com/TomekGa/amplisat/archive/refs/heads/master.zip
+unzip master.zip
+```
+
 2. Provide permissions to all scripts inside the directory.
    
 ```
-chmod -R 777 ~/amplisat
+chmod -R 777 ~/amplisat-master/
 ```
 3. Create the conda environment using the conda recipe file located inside *server_installation/* folder (requires installed conda).
 
 ```
-conda create -n Amplisat --file ~/amplisat/server_installation/Amplisas_conda_recipe.txt
+conda create -n Amplisat --file ~/amplisat-master/server_installation/Amplisas_conda_recipe.txt
 ```
 4. Activate conda environment.
 
