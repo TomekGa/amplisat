@@ -292,7 +292,7 @@ if (!defined($markerdata) || !%$markerdata){
 			'TCRG' => { 'primer_f_id'=>[''], 'primer_r_id'=>[''], 'primer_f' => [''], 'primer_r' => [''] },
 			'TCRD' => { 'primer_f_id'=>[''], 'primer_r_id'=>[''], 'primer_f' => [''], 'primer_r' => [''] }
 			};
-	$markers = ['TCRA', 'TCRB', 'TCRG', 'TCRD' ]
+	$markers = ['TCRA', 'TCRB', 'TCRG', 'TCRD' ];
 }
 # If there is no sample data, then define a unique sample with the name of the file
 my $sample_to_files;
@@ -320,7 +320,7 @@ if (!defined($sampledata) || !%$sampledata){
 # Creates sample information, each file will be a sample
 # But primer and sample data will be taken from .csv file
 
-#TOMEK"S CHANGE
+#TOMEK'S CHANGE
 my $working_dir;
 $working_dir = getcwd();
 #print($working_dir);
@@ -2690,6 +2690,7 @@ sub extract_cdr3_seqs {
 	my ($id_warning,$dist_warning)=(0,0);
 	foreach my $sample (keys %$sampledata){
 		foreach my $marker (keys %$markerdata){
+			#print($marker);
 			# Recognizes the chain defined by the marker
 			my $chain;
 			if ($marker =~ /TA|TRA|TCRA|alpha/i){
@@ -2782,14 +2783,20 @@ sub extract_cdr3_seqs {
 							exit;
 						}
 					}
-					# Remove any parenthesis or not standard symbol from sequences
-					$fwd_tag =~ s/[^\^ACGTUN]//g;
-					$rev_tag =~ s/[^\$ACGTUN]//g;
-					$fwd_primer =~ s/[^ACGTUN]//g;
-					$rev_primer =~ s/[^ACGTUN]//g;
+					# Remove any parenthesis or not standard symbol from sequences - TOMEK MODIFICATION - DEGENRATED SITES
+					$fwd_tag =~ s/[^\^ACGTUNMRWSYKVHDBN]//g;
+					$rev_tag =~ s/[^\$ACGTUNMRWSYKVHDBN]//g;
+					$fwd_primer =~ s/[^ACGTUNMRWSYKVHDBN]//g;
+					#print("\nREV PRIMER: ${rev_primer}\n");
+					$rev_primer =~ s/[^ACGTUNMRWSYKVHDBN]//g;
+					
 					# With the TCR pattern we will be able to identify samples
 					if ($fwd_tag.$fwd_primer ne '' && $rev_tag.$rev_primer ne ''){
 						my $tcr_pattern = sprintf('%s(\w*)%s', regex($fwd_tag.$fwd_primer), regex(iupac_reverse_complementary($rev_primer).iupac_reverse_complementary($rev_tag)) );
+						#print("\n${tcr_pattern}\n");
+						#print("\nREV TAG: ${rev_tag}");
+						#print("\nREV PRIMER: ${rev_primer}\n");
+						#print(iupac_reverse_complementary($rev_primer));
 						$tcr_patterns->{$sample}{$marker}{$amplicon_id} = $tcr_pattern;
 						# $tcr_patterns->{$sample}{$marker}{$amplicon_id} = sprintf('%s%s(\w+)%s%s', regex($fwd_tag), regex($fwd_primer), regex(iupac_reverse_complementary($rev_primer)), regex(iupac_reverse_complementary($rev_tag)) );
 					} else {
@@ -2805,6 +2812,7 @@ sub extract_cdr3_seqs {
 						$cdr3_pattern = sprintf('%s[\w-]+%s\w*%s', regex($fwd_tag.$fwd_primer), $cdr3_pattern, regex(iupac_reverse_complementary($rev_primer).iupac_reverse_complementary($rev_tag)) );
 					}
 					$cdr3_patterns->{$sample}{$marker}{$amplicon_id} = $cdr3_pattern;
+					print("\n${cdr3_pattern}\n");
 	# 				$cdr3_patterns->{$sample}{$marker}{$amplicon_id} = sprintf('%s%s\w{%d}(\w+)\w{%d}%s%s', regex($fwd_tag), regex($fwd_primer), $fwd_primer_dist-$INP_extra_length, $rev_primer_dist-$INP_extra_length, regex(iupac_reverse_complementary($rev_primer)), regex(iupac_reverse_complementary($rev_tag)) );
 					# UMI information: position and length
 					if ($umi){

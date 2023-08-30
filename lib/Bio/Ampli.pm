@@ -352,7 +352,7 @@ sub parse_amplicon_file {
 # 			}
 # 		}
 # 	}
-
+	#print("$markerdata\n$markers\n$sampledata\n$samples\n$paramsdata\n$alleledata");
 	return ($markerdata,$markers,$sampledata,$samples,$paramsdata,$alleledata);
 
 }
