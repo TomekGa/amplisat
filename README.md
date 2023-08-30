@@ -103,7 +103,7 @@ chmod -R 777 ~/amplisat-master/
 3. Create the conda environment using the conda recipe file located inside *server_installation/* folder (requires installed conda).
 
 ```
-conda create -n Amplisat --file ~/amplisat-master/server_installation/Amplisas_conda_recipe.txt
+conda env create -f ~/amplisat-master/server_installation/Amplisas_conda_recipe.yml
 ```
 4. Activate conda environment.
 
