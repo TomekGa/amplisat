@@ -29,6 +29,8 @@ my $DESCRIPTION = "Performs a comparison between two genotyping Excel files.\nEx
 
 
 # Modules are in folder 'lib' in the path of the script
+use FindBin; #modified - Tomek
+use lib "$FindBin::Bin/lib"; #modified - Tomek - forcing script to look for perl packages inside amplisas folder
 use File::FindLib 'lib';
 # Perl modules necessaries for the correct working of the script
 use Cwd;
