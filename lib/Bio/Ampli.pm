@@ -2759,7 +2759,7 @@ sub filter_amplicon_sequences {
 						}
 
 						# Exclude amplicon sequences with erroneous length
-						if (defined($filtering_parameters->{'discard_frameshifts'})){
+						if (defined($filtering_parameters->{'discard_frameshifts'}) && $filtering_parameters->{'discard_frameshifts'} =~ /^1$/){
 							my $right_len = 0;
 							foreach my $marker_len (@marker_lengths){
 								if (abs($marker_len-$len) % 3 == 0){
@@ -2784,19 +2784,19 @@ sub filter_amplicon_sequences {
 						}
 
 						# Exclude amplicon non coding sequences (with stop codons in reading frame)
-						if (defined($filtering_parameters->{'discard_noncoding'})){
+						if (defined($filtering_parameters->{'discard_noncoding'}) && $filtering_parameters->{'discard_noncoding'} =~ /^1$/){
 							my $coding = 0;
 							# Sets the reading frame with the first dominant sequence
 							if (!defined($reading_frame)){
 								print 'I should not be run';
 								#for (my $frame=0; $frame<=2; $frame++){
-								#	my $prot_seq = dna_to_prot(substr($seq,$frame));
-								#	if ($prot_seq !~ /\*/) {
-								#		$coding = 1;
-								#		$reading_frame = $frame;
-								#		last;
-								#	}
-								# }
+									#my $prot_seq = dna_to_prot(substr($seq,$frame));
+									#if ($prot_seq !~ /\*/) {
+										#$coding = 1;
+										#$reading_frame = $frame;
+										#last;
+									#}
+								 #}
 							} else {
 								my $prot_seq = dna_to_prot(substr($seq,$reading_frame));
 								if ($prot_seq !~ /\*/) {
