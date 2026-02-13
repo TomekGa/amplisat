@@ -2634,7 +2634,28 @@ sub filter_amplicon_sequences {
 # 			}
 
 			my (@filtered_amplicon_sequences, @filtered_amplicon_md5s);
+			#TOMEK - I'm calculating the most common reading frame across all sequences
 			my $reading_frame;
+			my %frame_count;
+			for (my $i=0; $i<=$#sorted_depth_amplicon_unique_md5s; $i++){
+				my $md5 = $sorted_depth_amplicon_unique_md5s[$i];
+				my $seq = $marker_seq_data->{$marker_name}{$md5}{'seq'};
+				for (my $frame=0; $frame<=2; $frame++){
+									my $prot_seq = dna_to_prot(substr($seq,$frame));
+									if ($prot_seq !~ /\*/) {
+										$frame_count{$frame}++;
+										last;
+									}
+								}
+							}
+			my $max_count = 0;
+			for my $frame (keys %frame_count) {
+				if ($frame_count{$frame} > $max_count) {
+					$max_count = $frame_count{$frame};
+					$reading_frame = $frame;
+				}
+		}
+			
 			for (my $i=0; $i<=$#sorted_depth_amplicon_unique_md5s; $i++){
 				my $md5 = $sorted_depth_amplicon_unique_md5s[$i];
 				my $seq = $marker_seq_data->{$marker_name}{$md5}{'seq'};
@@ -2647,6 +2668,7 @@ sub filter_amplicon_sequences {
 				my $min_freq = $marker_seq_data->{$marker_name}{$md5}{'min_freq'};
 				my $max_freq = $marker_seq_data->{$marker_name}{$md5}{'max_freq'};
 				my ($header,$cluster_size);
+				
 				if (defined($amplicon_seq_data->{$marker_name}{$sample_name}{$md5}{'cluster_size'})){
 					$cluster_size = $amplicon_seq_data->{$marker_name}{$sample_name}{$md5}{'cluster_size'};
 					$header = sprintf("hash=%s | len=%d | depth=%d | freq=%.2f | samples=%d | cluster_size=%s | mean_freq=%.2f | max_freq=%.2f | min_freq=%.2f", $md5, $len, $depth, $frequency, $count_samples, $cluster_size, $mean_freq, $max_freq, $min_freq);
@@ -2766,14 +2788,15 @@ sub filter_amplicon_sequences {
 							my $coding = 0;
 							# Sets the reading frame with the first dominant sequence
 							if (!defined($reading_frame)){
-								for (my $frame=0; $frame<=2; $frame++){
-									my $prot_seq = dna_to_prot(substr($seq,$frame));
-									if ($prot_seq !~ /\*/) {
-										$coding = 1;
-										$reading_frame = $frame;
-										last;
-									}
-								}
+								print 'I should not be run';
+								#for (my $frame=0; $frame<=2; $frame++){
+								#	my $prot_seq = dna_to_prot(substr($seq,$frame));
+								#	if ($prot_seq !~ /\*/) {
+								#		$coding = 1;
+								#		$reading_frame = $frame;
+								#		last;
+								#	}
+								# }
 							} else {
 								my $prot_seq = dna_to_prot(substr($seq,$reading_frame));
 								if ($prot_seq !~ /\*/) {
